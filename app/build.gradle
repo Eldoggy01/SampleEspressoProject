@@ -46,6 +46,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
 
+
     androidTestImplementation "ru.tinkoff.allure:allure-android:2.5.1@aar"
     androidTestImplementation "ru.tinkoff.allure:allure-common:2.5.1"
     androidTestImplementation "ru.tinkoff.allure:allure-model:2.5.1"
