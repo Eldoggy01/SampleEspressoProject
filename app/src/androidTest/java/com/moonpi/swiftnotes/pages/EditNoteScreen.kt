@@ -1,21 +1,16 @@
 package com.moonpi.swiftnotes.pages
 
-import android.support.test.espresso.Espresso
 import android.support.test.espresso.Espresso.onView
-import android.support.test.espresso.action.ViewActions
 import android.support.test.espresso.action.ViewActions.*
 import android.support.test.espresso.assertion.ViewAssertions
-import android.support.test.espresso.assertion.ViewAssertions.doesNotExist
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.matcher.ViewMatchers.*
-import android.support.test.espresso.matcher.ViewMatchers.withId
-import android.widget.TextView
 import com.moonpi.swiftnotes.R
-import org.hamcrest.CoreMatchers
 import org.hamcrest.CoreMatchers.*
-import org.hamcrest.Matchers
 
 class EditNoteScreen : BaseScreen() {
+    //FIXME постараться избавиться от текстовок при поиске и вынести их в check()
+
     private val noteTitleMatcher = allOf(withId(R.id.titleEdit), isDisplayed())
     private val noteBodyMatcher = allOf(withId(R.id.bodyEdit), isDisplayed())
     private val colourButtonMatcher = withId(R.id.action_note_colour)

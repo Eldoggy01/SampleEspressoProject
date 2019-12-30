@@ -1,8 +1,8 @@
 package com.moonpi.swiftnotes.test
 
 import android.util.Log
-import org.junit.Before
 import com.moonpi.swiftnotes.util.targetContext
+import org.junit.Before
 import org.junit.BeforeClass
 import java.io.File
 
@@ -24,6 +24,7 @@ abstract class AbstractSwiftnotesTest {
         Log.d("Setup", "App files have been cleared")
     }
 
+//TODO Обернуть шагами аллюра методы в пэйджах
     companion object {
         private const val ALLURE_DIR_PATH = "sdcard/allure-results"
 

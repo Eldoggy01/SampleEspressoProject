@@ -1,36 +1,25 @@
 package com.moonpi.swiftnotes.pages
 
-//import android.support.test.espresso.Espresso.onData
-//import android.support.test.espresso.Espresso.onView
-//import android.support.test.espresso.action.ViewActions.*
-//import android.support.test.espresso.assertion.ViewAssertions.matches
-//import android.support.test.espresso.matcher.ViewMatchers.*
-//import com.moonpi.swiftnotes.R
-//import org.hamcrest.CoreMatchers.*
-//import org.hamcrest.Matchers.hasEntry
-//import org.json.JSONArray
-
-
-//import org.hamcrest.CoreMatchers.*
-
-
-import android.support.test.espresso.Espresso.onData
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.action.ViewActions.click
-import android.support.test.espresso.action.ViewActions.longClick
-import android.support.test.espresso.assertion.ViewAssertions.doesNotExist
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.matcher.BoundedMatcher
 import android.support.test.espresso.matcher.ViewMatchers.*
+import android.view.View
+import android.widget.AdapterView
 import com.moonpi.swiftnotes.R
 import org.hamcrest.CoreMatchers
 import org.hamcrest.Description
-import org.hamcrest.Matchers.*
+import org.hamcrest.Matcher
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.TypeSafeMatcher
 import org.json.JSONException
 import org.json.JSONObject
 
 
 class MainScreen : BaseScreen() {
+    //FIXME постараться избавиться от текстовок при поиске и вынести их в check()
+
     private val titleMatcher = allOf(withText("Swiftnotes"))
     private val newNoteMatcher = withId(R.id.newNote)
     private val searchButtonMatcher = withId(R.id.action_search)
@@ -53,7 +42,7 @@ class MainScreen : BaseScreen() {
         onView(deleteYesMatcher).perform(click())
     }
 
-    fun checkIsTitleDisplayed() {
+    fun checkTitleDisplayed() {
         onView(titleMatcher).check(matches(isDisplayed()))
     }
 
@@ -89,66 +78,47 @@ class MainScreen : BaseScreen() {
         onView(noteBodyMatcher).check(matches(withText(expectedText)))
     }
 
-    //FIXME Метод работает. Но если вдруг передать данные несуществующей
-    //     * записи, то после того, как матчер ничего не находит,Espresso выбрасывает неочевидное исключение
-    //     * которое ни о чем не говорит. PerformException: Error performing 'load adapter data' on view
-    /**
-     * Метод для проверки наличия записи в длинном списке записей. Е
-     **/
+//FIXME? На данный момент в случае неудачного поиска выбрасывается исключение с не очень очевидным описанием.
     fun checkRowExist(titleString: String, bodyString: String) {
-        onData(object : BoundedMatcher<Any?, JSONObject>(JSONObject::class.java) {
-            override fun describeTo(description: Description) {
-                description.appendText("Matching to JSONObject")
-            }
-
-            override fun matchesSafely(jsonObject: JSONObject): Boolean {
-                return try {
-                    titleString == jsonObject.getString("title")
-                    bodyString == jsonObject.getString("body")
-                } catch (e: JSONException) {
-                    false
-                }
-            }
-        }).check(matches(isDisplayed()))
-
+        onView(withId(R.id.listView)).check(matches(withAdaptedData(withTitleAndBody(titleString, bodyString))))
     }
 
-    //FIXME аналогично, если вдруг матчер не прошел, то выбрасывается непонятное исключение  PerformException: Error performing 'load adapter data' on view
-    fun longClickRow(titleString: String, bodyString: String) {
-        onData(object : BoundedMatcher<Any?, JSONObject>(JSONObject::class.java) {
+    private fun withTitleAndBody(titleString: String, bodyString: String): Matcher<Any> {
+        return object : BoundedMatcher<Any, JSONObject>(JSONObject::class.java) {
             override fun describeTo(description: Description) {
                 description.appendText("Matching to JSONObject")
             }
 
             override fun matchesSafely(jsonObject: JSONObject): Boolean {
                 return try {
-                    titleString == jsonObject.getString("title")
-                    bodyString == jsonObject.getString("body")
+                    bodyString == jsonObject.getString("body") &&
+                            titleString == jsonObject.getString("title")
                 } catch (e: JSONException) {
                     false
                 }
             }
-        }).perform(longClick())
-
+        }
     }
 
-
-    //FIXME Метод не работает как надо  PerformException: Error performing 'load adapter data' on view
-    fun checkRowNotExist(titleString: String, bodyString: String) {
-        onData(object : BoundedMatcher<Any?, JSONObject>(JSONObject::class.java) {
+    private fun withAdaptedData(dataMatcher: Matcher<Any>): Matcher<View> {
+        return object : TypeSafeMatcher<View>() {
             override fun describeTo(description: Description) {
-                description.appendText("Matching to JSONObject")
+                description.appendText("with class name: ")
+                dataMatcher.describeTo(description)
             }
 
-            override fun matchesSafely(jsonObject: JSONObject): Boolean {
-                return try {
-                    titleString == jsonObject.getString("title")
-                    bodyString == jsonObject.getString("body")
-                } catch (e: JSONException) {
-                    false
+            public override fun matchesSafely(view: View): Boolean {
+                if (view !is AdapterView<*>) {
+                    return false
                 }
+                val adapter = view.adapter
+                for (i in 0 until adapter.count) {
+                    if (dataMatcher.matches(adapter.getItem(i))) {
+                        return true
+                    }
+                }
+                return false
             }
-        }).check(doesNotExist())
-
+        }
     }
 }
