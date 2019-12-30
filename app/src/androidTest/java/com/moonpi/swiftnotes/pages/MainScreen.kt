@@ -78,7 +78,6 @@ class MainScreen : BaseScreen() {
         onView(noteBodyMatcher).check(matches(withText(expectedText)))
     }
 
-//FIXME? На данный момент в случае неудачного поиска выбрасывается исключение с не очень очевидным описанием.
     fun checkRowExist(titleString: String, bodyString: String) {
         onView(withId(R.id.listView)).check(matches(withAdaptedData(withTitleAndBody(titleString, bodyString))))
     }
@@ -86,7 +85,7 @@ class MainScreen : BaseScreen() {
     private fun withTitleAndBody(titleString: String, bodyString: String): Matcher<Any> {
         return object : BoundedMatcher<Any, JSONObject>(JSONObject::class.java) {
             override fun describeTo(description: Description) {
-                description.appendText("Matching to JSONObject")
+                description.appendText("Row with title: $titleString and body: $bodyString")
             }
 
             override fun matchesSafely(jsonObject: JSONObject): Boolean {
@@ -103,7 +102,6 @@ class MainScreen : BaseScreen() {
     private fun withAdaptedData(dataMatcher: Matcher<Any>): Matcher<View> {
         return object : TypeSafeMatcher<View>() {
             override fun describeTo(description: Description) {
-                description.appendText("with class name: ")
                 dataMatcher.describeTo(description)
             }
 
